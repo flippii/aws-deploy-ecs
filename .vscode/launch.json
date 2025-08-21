@@ -1,0 +1,48 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "WorldServiceApplication",
+            "request": "launch",
+            "mainClass": "com.world.service.WorldServiceApplication"
+        },
+        {
+            "type": "java",
+            "name": "HelloServiceApplication",
+            "request": "launch",
+            "mainClass": "com.hello.service.HelloServiceApplication",
+            "projectName": "hello-service"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-HelloServiceApplication<hello-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.hello.service.hello_service.HelloServiceApplication",
+            "projectName": "hello-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=58708 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=hello-service"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-HelloWorldClientApplication<hello-world-client>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.hello.world.client.HelloWorldClientApplication",
+            "projectName": "hello-world-client",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-WorldServiceApplication<world-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.world.service.WorldServiceApplication",
+            "projectName": "world-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -1,0 +1,92 @@
+
+env:
+  DOCKER_IMAGE_NAME: hello-svc
+  DOCKER_REGISTRY: public.ecr.aws
+name: "Hello Service Build and Terraform Deployment"
+on:
+  # Manual trigger
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "hello-service/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "hello-service/**"
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./hello-service
+    name: Maven Build
+    runs-on: [ubuntu-latest]
+    outputs:
+      commit-hash: ${{ steps.get-commit-hash.outputs.commit-hash }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: "21"
+          distribution: "adopt"
+      - name: Build with Maven
+        run: mvn package
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app.jar
+          path: hello-service/target/hello-service-0.0.1.jar
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "commit-hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+  docker:
+    defaults:
+      run:
+        working-directory: ./hello-service
+    needs: [build]
+    name: Build and Push Docker Image
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Login to Amazon Public ECR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app.jar
+          path: hello-service/target/hello-service-0.0.1.jar
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+        with:
+          context: ./hello-service
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY}}/l3s1l9f4/${{ env.DOCKER_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKER_REGISTRY}}/l3s1l9f4/${{ env.DOCKER_IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          provenance: false
