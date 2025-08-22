@@ -21,8 +21,6 @@ jobs:
         working-directory: ./world-service
     name: Maven Build
     runs-on: [ubuntu-latest]
-    outputs:
-      commit-hash: ${{ steps.get-commit-hash.outputs.commit-hash }}
     steps:
       - uses: actions/checkout@v5
       - name: Set up JDK 21
@@ -40,15 +38,6 @@ jobs:
       - name: Get commit hash
         id: get-commit-hash
         run: echo "commit-hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-  docker:
-    defaults:
-      run:
-        working-directory: ./world-service
-    needs: [build]
-    name: Build and Push Docker Image
-    runs-on: [ubuntu-latest]
-    steps:
-      - uses: actions/checkout@v5
       - name: Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -72,14 +61,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app.jar
-          path: world-service/target/world-service-0.0.1.jar
       - name: Get timestamp
         id: get-timestamp
         run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
       - name: Build Docker image
         uses: docker/build-push-action@v6
         env:
-          IMAGE_TAG: ${{ needs.build.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
         with:
           context: ./world-service
           push: true
