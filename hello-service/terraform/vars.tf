@@ -14,5 +14,5 @@ variable "vpc_id" {
   default = ""
 }
 variable "container_version" {
-  default = ""
+  default = "latest"
 }
