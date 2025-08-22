@@ -65,6 +65,7 @@ jobs:
       - name: Get timestamp
         id: get-timestamp
         run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+      - run: find .
       - name: Build Docker image
         uses: docker/build-push-action@v6
         env:
