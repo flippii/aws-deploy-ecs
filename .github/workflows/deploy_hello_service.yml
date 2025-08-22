@@ -36,7 +36,6 @@ jobs:
         with:
           name: app.jar
           path: hello-service/target/hello-service-0.0.1.jar
-      - uses: actions/checkout@v5
       - name: Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -67,6 +66,7 @@ jobs:
         id: get-timestamp
         run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
       - run: find .
+      - run: find ../.
       - name: Build Docker image
         uses: docker/build-push-action@v6
         env:
