@@ -81,7 +81,7 @@ jobs:
     defaults:
       run:
         working-directory: ./world-service/terraform
-    needs: [docker]
+    needs: [build]
     name:  Build Terraform - Env ${{ matrix.environment }}
     runs-on: [ubuntu-latest]
     strategy:
