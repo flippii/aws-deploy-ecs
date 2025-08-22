@@ -9,7 +9,7 @@ data "aws_subnets" "private" {
     values = [var.vpc_id]
   }
   tags = {
-    Name = "*Private*"
+    Name = "Private*"
   }
 }
 
@@ -19,7 +19,7 @@ data "aws_subnets" "public" {
     values = [var.vpc_id]
   }
   tags = {
-    Name = "*Public*"
+    Name = "Public*"
   }
 }
 
